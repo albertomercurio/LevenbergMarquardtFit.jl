@@ -10,8 +10,8 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [compat]
 julia = "1.5"
-Aqua = "0.8"
-JET = "0.8"
+Aqua = "0.7, 0.8"
+JET = "0.7, 0.8"
 FiniteDiff = "2"
 ForwardDiff = "0.10"
 LinearAlgebra = "<0.0.1, 1"
