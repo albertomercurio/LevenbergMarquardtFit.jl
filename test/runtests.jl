@@ -9,7 +9,7 @@ using LinearAlgebra
         @. p[1] * exp(-(x - p[3])^2 / $(2 * p[2]^2))
     end
     
-    xdata = range(0, 10, 10000) |> collect
+    xdata = range(0, 10, length=10000) |> collect
     
     p0 = [1, 9, 0.1]
     p_correct = [2, 1, 5]
