@@ -82,7 +82,7 @@ function curve_fit(f::Function, xdata::AbstractArray, ydata::AbstractArray, p0::
 
     # Inizializzazione dei parametri
     n = length(p0)
-    m = length(xdata)
+    m = length(ydata)
 
     dy = copy(ydata)
 
