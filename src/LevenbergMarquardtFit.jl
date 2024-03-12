@@ -37,6 +37,7 @@ struct FitResult{PT<:AbstractVector, RT<:Real, JT<:AbstractArray, CT<:Bool, IT<:
     jacobian::JT
     converged::CT
     iterations::IT
+    nfails::IT
 end
 
 # write a show method in the text/plain format for the FitResult struct
@@ -47,6 +48,7 @@ function Base.show(io::IO, r::FitResult)
     println(io, "  jacobian: ", r.jacobian)
     println(io, "  converged: ", r.converged)
     println(io, "  iterations: ", r.iterations)
+    println(io, "  fails: ", r.nfails)
 end
 
 
@@ -64,10 +66,11 @@ apply_f!(f, dy, p, xdata, diff_method::AutoDiffMethod) = f(xdata, p)
 function curve_fit(f::Function, xdata::AbstractArray, ydata::AbstractArray, p0::AbstractArray; 
     lower::AbstractArray=fill(-Inf, length(p0)), upper::AbstractArray=fill(Inf, length(p0)),
     maxiter::Int = 1000,
-    λ::LT = 10,
+    λ::LT1 = 10,
+    λ_factor::LT2 = 2,
     abstol::ET = 1e-8,
     reltol::ET = 1e-5,
-    diff_method::MyMethod = FiniteDiffMethod(f, p0, xdata)) where {MyMethod<:DiffMethod,LT<:Real,ET<:Real}
+    diff_method::MyMethod = FiniteDiffMethod(f, p0, xdata)) where {MyMethod<:DiffMethod,LT1<:Real,LT2<:Real,ET<:Real}
 
     # check that the boundaries are consistent
     idxs = similar(p0, Bool)
@@ -101,18 +104,22 @@ function curve_fit(f::Function, xdata::AbstractArray, ydata::AbstractArray, p0::
     _jacobian!(J, g, p, diff_method)
 
     iter = 0
+    nfails = 0
+    failed = false
     converged = false
 
     # Iterazioni dell'algoritmo
     while !converged && iter <= maxiter
-        residual = ydata - apply_f!(f, dy, p, xdata, diff_method)
+        if !failed
+            residual = ydata - apply_f!(f, dy, p, xdata, diff_method)
 
-        mul!(cache_vec1, J', residual)
-        copyto!(cache_vec2, cache_vec1)
-        mul!(cache_mat1, J', J)
-        copyto!(JJ, cache_mat1)
+            mul!(cache_vec1, J', residual)
+            copyto!(cache_vec2, cache_vec1)
+            mul!(cache_mat1, J', J)
+            copyto!(JJ, cache_mat1)
+        end
 
-        JJ[diagind(JJ)] .+= λ
+        JJ[diagind(JJ)] .+= (λ - failed*λ/λ_factor)
 
         ldiv!(dp, factorize(JJ), cache_vec2)
 
@@ -133,18 +140,21 @@ function curve_fit(f::Function, xdata::AbstractArray, ydata::AbstractArray, p0::
         # Aggiornamento dei parametri dell'algoritmo
         residual_new = ydata - apply_f!(f, dy, p_new, xdata, diff_method)
         if dot(residual_new, residual_new) < dot(residual, residual)
-            λ /= 10
+            λ /= λ_factor
             p = p_new
             _jacobian!(J, g, p, diff_method)
+            failed = false
         else
-            λ *= 10
+            λ *= λ_factor
+            nfails += 1
+            failed = true
         end
 
         iter += 1
     end
 
     residual = ydata - apply_f!(f, dy, p, xdata, diff_method)
-    return FitResult(p, dot(residual, residual), J, converged, iter)
+    return FitResult(p, dot(residual, residual), J, converged, iter, nfails)
 end
 
 end
