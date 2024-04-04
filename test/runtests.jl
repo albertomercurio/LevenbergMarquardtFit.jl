@@ -1,6 +1,7 @@
 using LevenbergMarquardtFit
 using Test
 using Aqua
+using JET
 using LinearAlgebra
 
 @testset "LevenbergMarquardtFit.jl" begin
@@ -28,4 +29,10 @@ end
 
 @testset "Code quality (Aqua.jl)" begin
     Aqua.test_all(LevenbergMarquardtFit; ambiguities = false,)
+end
+
+@testset "Code quality (JET.jl)" begin
+    if VERSION >= v"1.9"
+        JET.test_package(LevenbergMarquardtFit; target_defined_modules=true, ignore_missing_comparison=true)
+    end
 end
