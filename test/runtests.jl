@@ -1,8 +1,13 @@
 using LevenbergMarquardtFit
 using Test
-using Aqua
-using JET
 using LinearAlgebra
+
+if VERSION >= v"1.10"
+    import Pkg
+    Pkg.add(["Aqua", "JET"])
+    using Aqua
+    using JET
+end
 
 @testset "LevenbergMarquardtFit.jl" begin
     function f(x,p)
@@ -27,12 +32,12 @@ using LinearAlgebra
     @test p_opt_auto ≈ p_correct atol=1e-5
 end
 
-@testset "Code quality (Aqua.jl)" begin
-    Aqua.test_all(LevenbergMarquardtFit; ambiguities = false,)
-end
+if VERSION >= v"1.10"
+    @testset "Code quality (Aqua.jl)" begin
+        Aqua.test_all(LevenbergMarquardtFit; ambiguities = false,)
+    end
 
-@testset "Code quality (JET.jl)" begin
-    if VERSION >= v"1.9"
-        JET.test_package(LevenbergMarquardtFit; target_defined_modules=true, ignore_missing_comparison=true)
+    @testset "Code quality (JET.jl)" begin
+            JET.test_package(LevenbergMarquardtFit; target_defined_modules=true, ignore_missing_comparison=true)
     end
 end
