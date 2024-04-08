@@ -9,5 +9,3 @@ jobs:
       pull-requests: write 
     steps:
       - uses: julia-actions/julia-format@v2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}

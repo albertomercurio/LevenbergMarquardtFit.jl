@@ -10,7 +10,7 @@ if VERSION >= v"1.10"
 end
 
 @testset "LevenbergMarquardtFit.jl" begin
-    function f(x,p)
+    function f(x, p)
         @. p[1] * exp(-(x - p[3])^2 / $(2 * p[2]^2))
     end
     
@@ -34,10 +34,14 @@ end
 
 if VERSION >= v"1.10"
     @testset "Code quality (Aqua.jl)" begin
-        Aqua.test_all(LevenbergMarquardtFit; ambiguities = false,)
+        Aqua.test_all(LevenbergMarquardtFit; ambiguities = false)
     end
 
     @testset "Code quality (JET.jl)" begin
-        JET.test_package(LevenbergMarquardtFit; target_defined_modules=true, ignore_missing_comparison=true)
+        JET.test_package(  
+            LevenbergMarquardtFit;  
+            target_defined_modules = true,  
+            ignore_missing_comparison = true,  
+        )
     end
 end
