@@ -38,6 +38,6 @@ if VERSION >= v"1.10"
     end
 
     @testset "Code quality (JET.jl)" begin
-            JET.test_package(LevenbergMarquardtFit; target_defined_modules=true, ignore_missing_comparison=true)
+        JET.test_package(LevenbergMarquardtFit; target_defined_modules=true, ignore_missing_comparison=true)
     end
 end
