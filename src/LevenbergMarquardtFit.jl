@@ -31,7 +31,7 @@ function AutoDiffMethod(f, p0, xdata)
     AutoDiffMethod(JacobianConfig(g, p0), g)
 end
 
-struct FitResult{PT<:AbstractVector, RT<:Real, JT<:AbstractArray, CT<:Bool, IT<:Integer}
+struct FitResult{PT<:AbstractVector,RT<:Real,JT<:AbstractArray,CT<:Bool,IT<:Integer}
     params::PT
     resid::RT
     jacobian::JT
@@ -53,9 +53,11 @@ end
 
 
 
-_jacobian!(J, f::Function, x0, diff_method::FiniteDiffMethod) = FiniteDiff.finite_difference_jacobian!(J, f, x0, diff_method.jacobian_cache)
+_jacobian!(J, f::Function, x0, diff_method::FiniteDiffMethod) =
+    FiniteDiff.finite_difference_jacobian!(J, f, x0, diff_method.jacobian_cache)
 
-_jacobian!(J, f::Function, x0, diff_method::AutoDiffMethod) = ForwardDiff.jacobian!(J, f, x0, diff_method.jacobian_cache)
+_jacobian!(J, f::Function, x0, diff_method::AutoDiffMethod) =
+    ForwardDiff.jacobian!(J, f, x0, diff_method.jacobian_cache)
 
 
 
@@ -63,14 +65,20 @@ apply_f!(f, dy, p, xdata, diff_method::FiniteDiffMethod) = copyto!(dy, f(xdata, 
 
 apply_f!(f, dy, p, xdata, diff_method::AutoDiffMethod) = f(xdata, p)
 
-function curve_fit(f::Function, xdata::AbstractArray, ydata::AbstractArray, p0::AbstractArray; 
-    lower::AbstractArray=fill(-Inf, length(p0)), upper::AbstractArray=fill(Inf, length(p0)),
+function curve_fit(
+    f::Function,
+    xdata::AbstractArray,
+    ydata::AbstractArray,
+    p0::AbstractArray;
+    lower::AbstractArray = fill(-Inf, length(p0)),
+    upper::AbstractArray = fill(Inf, length(p0)),
     maxiter::Int = 1000,
     λ::LT1 = 10,
     λ_factor::LT2 = 2,
     abstol::ET = 1e-8,
     reltol::ET = 1e-5,
-    diff_method::MyMethod = FiniteDiffMethod(f, p0, xdata)) where {MyMethod<:DiffMethod,LT1<:Real,LT2<:Real,ET<:Real}
+    diff_method::MyMethod = FiniteDiffMethod(f, p0, xdata),
+) where {MyMethod<:DiffMethod,LT1<:Real,LT2<:Real,ET<:Real}
 
     # check that the boundaries are consistent
     idxs = similar(p0, Bool)
@@ -98,7 +106,7 @@ function curve_fit(f::Function, xdata::AbstractArray, ydata::AbstractArray, p0::
     cache_mat1 = similar(dy, n, n)
     cache_vec1 = similar(dy, n)
     cache_vec2 = similar(p, n)
-    
+
 
     # Calcolo del gradiente e della matrice hessiana
     _jacobian!(J, g, p, diff_method)
@@ -119,7 +127,7 @@ function curve_fit(f::Function, xdata::AbstractArray, ydata::AbstractArray, p0::
             copyto!(JJ, cache_mat1)
         end
 
-        JJ[diagind(JJ)] .+= (λ - failed*λ/λ_factor)
+        JJ[diagind(JJ)] .+= (λ - failed * λ / λ_factor)
 
         ldiv!(dp, factorize(JJ), cache_vec2)
 
